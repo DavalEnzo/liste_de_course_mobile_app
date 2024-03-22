@@ -27,13 +27,22 @@ export default function App() {
         getUsers()
     }, []);
 
-    const getUsers = () => {
-        axios.get('http://192.168.1.45:5000/api/users')
-            .then((response) => {
-                if (response.data) setUsers(response.data);
-            }).catch((err) => {
+    const getUsers = async () => {
+        try {
+            const response = await axios.get('http://192.168.1.45:5000/api/users');
+            if (response.data) setUsers(response.data);
+
+            const userStorage = await AsyncStorage.getItem("user");
+            if (userStorage) {
+                const storedUser = JSON.parse(userStorage);
+                setUser(storedUser);
+
+                const coursesResponse = await axios.get(`http://192.168.1.45:5000/api/courses/${storedUser._id}`);
+                setCourses(coursesResponse.data);
+            }
+        } catch (err) {
             console.log(err);
-        });
+        }
     }
 
     const selectUser = (user) => {
@@ -115,7 +124,7 @@ export default function App() {
         setQuantity('1');
         setUsers([]);
         setCourses([])
-        getUsers()
+        await getUsers()
     }
 
     const scrollViewRef = useRef();
