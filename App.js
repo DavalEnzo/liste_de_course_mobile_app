@@ -9,11 +9,12 @@ import {
     ButtonText, Card, Input, InputField, ButtonIcon, AddIcon, TrashIcon, CheckIcon, CloseIcon
 } from '@gluestack-ui/themed';
 import {config} from '@gluestack-ui/config'; // Optional if you want to use default theme
-import {ScrollView, StyleSheet, TouchableOpacity} from "react-native";
+import {KeyboardAvoidingView, ScrollView, StyleSheet, TouchableOpacity} from "react-native";
 import axios from "axios";
 import {useEffect, useRef, useState} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
+import {API_IP} from "@env"
 
 export default function App() {
 
@@ -29,7 +30,7 @@ export default function App() {
 
     const getUsers = async () => {
         try {
-            const response = await axios.get('http://192.168.1.45:5000/api/users');
+            const response = await axios.get(`http://${API_IP}/api/users`);
             if (response.data) setUsers(response.data);
 
             const userStorage = await AsyncStorage.getItem("user");
@@ -37,7 +38,7 @@ export default function App() {
                 const storedUser = JSON.parse(userStorage);
                 setUser(storedUser);
 
-                const coursesResponse = await axios.get(`http://192.168.1.45:5000/api/courses/${storedUser._id}`);
+                const coursesResponse = await axios.get(`http://${API_IP}/api/courses/${storedUser._id}`);
                 setCourses(coursesResponse.data);
             }
         } catch (err) {
@@ -50,7 +51,7 @@ export default function App() {
             await AsyncStorage.setItem('user', JSON.stringify(user))
             setUser(user)
 
-            axios.get(`http://192.168.1.45:5000/api/courses/${user._id}`)
+            axios.get(`http://${API_IP}/api/courses/${user._id}`)
                 .then((response) => {
                     setCourses(response.data);
                 }).catch((err) => {
@@ -60,7 +61,7 @@ export default function App() {
     }
 
     const ajouterTache = () => {
-        axios.post('http://192.168.1.45:5000/api/courses', {
+        axios.post(`http://${API_IP}/api/courses`, {
             title: value,
             quantity: quantity,
             user: user._id
@@ -82,7 +83,7 @@ export default function App() {
 
     const removeCourse = (course) => {
         return () => {
-            axios.delete(`http://192.168.1.45:5000/api/courses/${course._id}`)
+            axios.delete(`http://${API_IP}/api/courses/${course._id}`)
                 .then(() => {
                     setCourses(courses.filter(c => c._id !== course._id));
                     Toast.show({
@@ -100,7 +101,7 @@ export default function App() {
 
     const updateCourse = (course) => {
         return () => {
-            axios.put(`http://192.168.1.45:5000/api/courses/${course._id}`, {
+            axios.put(`http://${API_IP}/api/courses/${course._id}`, {
                 isDone: !course.isDone
             }).then((response) => {
                 setCourses(courses.map(c => c._id === course._id ? response.data : c));
@@ -156,7 +157,7 @@ export default function App() {
                     </Center>
                 </>
             ) : (
-                <Center style={{marginTop: '15%', marginBottom: '5%', flex: 1}}>
+                <KeyboardAvoidingView behavior={"padding"} style={{marginTop: '15%', marginBottom: '5%', flex: 1}}>
                     {courses.length === 0
                         ?
                         <Heading style={{textAlign:'center'}}>Bonjour {user.name}👋{"\n"} Aucune tâche n'a encore été enregistrée</Heading>
@@ -258,21 +259,24 @@ export default function App() {
                                 </Button>
                             </View>
 
-                            <Button
-                                size="md"
-                                variant="solid"
-                                action="negative"
-                                isDisabled={false}
-                                isFocusVisible={false}
-                                onPress={logout}
-                                style={{width:'70%', marginLeft:'auto', marginRight:'auto'}}
-                            >
-                                <ButtonText>Se déconnecter</ButtonText>
-                            </Button>
+                            <Center>
+                                <Button
+                                  size="md"
+                                  variant="solid"
+                                  action="negative"
+                                  isDisabled={false}
+                                  isFocusVisible={false}
+                                  onPress={logout}
+                                  style={{width:'70%', marginLeft:'auto', marginRight:'auto'}}
+                                >
+                                    <ButtonText>Se déconnecter</ButtonText>
+                                </Button>
+                            </Center>
+
                         </View>
                     </Center>
                     <Toast />
-                </Center>
+                </KeyboardAvoidingView>
             )}
         </GluestackUIProvider>
     );
