@@ -30,7 +30,7 @@ export default function App() {
 
     const getUsers = async () => {
         try {
-            const response = await axios.get(`http://${API_IP}/api/users`);
+            const response = await axios.get(`https://${API_IP}/api/users`);
             if (response.data) setUsers(response.data);
 
             const userStorage = await AsyncStorage.getItem("user");
@@ -38,7 +38,7 @@ export default function App() {
                 const storedUser = JSON.parse(userStorage);
                 setUser(storedUser);
 
-                const coursesResponse = await axios.get(`http://${API_IP}/api/courses/${storedUser._id}`);
+                const coursesResponse = await axios.get(`https://${API_IP}/api/courses/${storedUser._id}`);
                 setCourses(coursesResponse.data);
             }
         } catch (err) {
@@ -51,7 +51,7 @@ export default function App() {
             await AsyncStorage.setItem('user', JSON.stringify(user))
             setUser(user)
 
-            axios.get(`http://${API_IP}/api/courses/${user._id}`)
+            axios.get(`https://${API_IP}/api/courses/${user._id}`)
                 .then((response) => {
                     setCourses(response.data);
                 }).catch((err) => {
@@ -61,7 +61,7 @@ export default function App() {
     }
 
     const ajouterTache = () => {
-        axios.post(`http://${API_IP}/api/courses`, {
+        axios.post(`https://${API_IP}/api/courses`, {
             title: value,
             quantity: quantity,
             user: user._id
@@ -83,7 +83,7 @@ export default function App() {
 
     const removeCourse = (course) => {
         return () => {
-            axios.delete(`http://${API_IP}/api/courses/${course._id}`)
+            axios.delete(`https://${API_IP}/api/courses/${course._id}`)
                 .then(() => {
                     setCourses(courses.filter(c => c._id !== course._id));
                     Toast.show({
@@ -101,7 +101,7 @@ export default function App() {
 
     const updateCourse = (course) => {
         return () => {
-            axios.put(`http://${API_IP}/api/courses/${course._id}`, {
+            axios.put(`https://${API_IP}/api/courses/${course._id}`, {
                 isDone: !course.isDone
             }).then((response) => {
                 setCourses(courses.map(c => c._id === course._id ? response.data : c));
